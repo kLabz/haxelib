@@ -1582,6 +1582,9 @@ class Main {
 
 		var libPath = proj + "/" + vcs.directory;
 
+		var willClone = false;
+		var willUpdate = false;
+
 		if ( FileSystem.exists(proj + "/" + Data.safe(vcs.directory)) ) {
 			print("You already have "+libName+" version "+vcs.directory+" installed.");
 
@@ -1592,16 +1595,21 @@ class Main {
 				&& ask("Overwrite branch: " + (currentBranch == null?"<unspecified>":"\"" + currentBranch + "\"") + " with \"" + branch + "\""))
 			{
 				deleteRec(libPath);
-				this.alreadyUpdatedVcsDependencies.set(libName, branch);
+				willClone = true;
 			}
 			else if (!wasUpdated)
 			{
-				print("Updating " + libName+" version " + vcs.directory + " ...");
-				updateByName(rep, libName);
+				willUpdate = true;
 			}
 		} else {
-			print("Installing " +libName + " from " +url + ( branch != null ? " branch: " + branch : "" ));
+			willClone = true;
+		}
 
+		if (willUpdate) {
+			print("Updating " + libName+" version " + vcs.directory + " ...");
+			updateByName(rep, libName);
+		} else if (willClone) {
+			print("Installing " +libName + " from " +url + ( branch != null ? " branch: " + branch : "" ));
 			try {
 				vcs.clone(libPath, url, branch, version);
 			} catch(error:VcsError) {
